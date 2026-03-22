@@ -1,0 +1,70 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: 'Registry to publish to'
+        required: true
+        type: choice
+        options:
+          - github
+          - npm
+          - both
+        default: github
+      dry_run:
+        description: 'Dry run (no actual publish)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    name: Publish to ${{ github.event.inputs.registry }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test:unit
+
+      - name: Build
+        run: pnpm build
+
+      - name: Dry run
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "DRY RUN - would publish @tummycrypt/tinyland-auth-redis"
+          npm pack --dry-run 2>&1 | tail -20
+
+      - name: Publish to GitHub Packages
+        if: github.event.inputs.dry_run == 'false' && (github.event.inputs.registry == 'github' || github.event.inputs.registry == 'both')
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          echo "@tummycrypt:registry=https://npm.pkg.github.com" >> .npmrc
+          npm publish --access restricted
+          echo "Published to GitHub Packages"
+
+      - name: Publish to npm
+        if: github.event.inputs.dry_run == 'false' && (github.event.inputs.registry == 'npm' || github.event.inputs.registry == 'both')
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          npm publish --access restricted
+          echo "Published to npm"

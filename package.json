@@ -1,0 +1,42 @@
+{
+  "name": "@tummycrypt/tinyland-auth-redis",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Redis (Upstash) storage adapter for @tummycrypt/tinyland-auth",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jesssullivan/tinyland-auth-redis.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.36.3"
+  },
+  "peerDependencies": {
+    "@tummycrypt/tinyland-auth": "^0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
