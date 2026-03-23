@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ['main', 'dev/**']
+    branches: [main, 'dev/**']
   pull_request:
-    branches: ['main']
+    branches: [main]
 
 jobs:
   test:
@@ -13,12 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+          node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
@@ -33,12 +35,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+          node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile

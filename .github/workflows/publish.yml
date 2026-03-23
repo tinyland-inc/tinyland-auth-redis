@@ -1,17 +1,10 @@
 name: Publish
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
-      registry:
-        description: 'Registry to publish to'
-        required: true
-        type: choice
-        options:
-          - github
-          - npm
-          - both
-        default: github
       dry_run:
         description: 'Dry run (no actual publish)'
         required: false
@@ -19,8 +12,43 @@ on:
         default: true
 
 jobs:
-  publish:
-    name: Publish to ${{ github.event.inputs.registry }}
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to npm
+        if: ${{ github.event_name == 'release' || github.event.inputs.dry_run != 'true' }}
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish dry run
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: npm publish --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-github:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,43 +56,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+          node-version: 20
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@tummycrypt'
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run tests
-        run: pnpm test:unit
-
       - name: Build
         run: pnpm build
 
-      - name: Dry run
-        if: github.event.inputs.dry_run == 'true'
-        run: |
-          echo "DRY RUN - would publish @tummycrypt/tinyland-auth-redis"
-          npm pack --dry-run 2>&1 | tail -20
-
       - name: Publish to GitHub Packages
-        if: github.event.inputs.dry_run == 'false' && (github.event.inputs.registry == 'github' || github.event.inputs.registry == 'both')
+        if: ${{ github.event_name == 'release' || github.event.inputs.dry_run != 'true' }}
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          echo "@tummycrypt:registry=https://npm.pkg.github.com" >> .npmrc
-          npm publish --access restricted
-          echo "Published to GitHub Packages"
 
-      - name: Publish to npm
-        if: github.event.inputs.dry_run == 'false' && (github.event.inputs.registry == 'npm' || github.event.inputs.registry == 'both')
+      - name: Publish dry run
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: npm publish --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          npm publish --access restricted
-          echo "Published to npm"
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
