@@ -6,10 +6,10 @@
   "description": "Redis (Upstash) storage adapter for @tummycrypt/tinyland-auth",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jesssullivan/tinyland-auth-redis.git"
+    "url": "https://github.com/tinyland-inc/tinyland-auth-redis.git"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "exports": {
     ".": {
