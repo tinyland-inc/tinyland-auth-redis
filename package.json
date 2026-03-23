@@ -9,7 +9,6 @@
     "url": "https://github.com/Jesssullivan/tinyland-auth-redis.git"
   },
   "publishConfig": {
-    "access": "public",
     "access": "restricted"
   },
   "exports": {
@@ -36,6 +35,7 @@
     "@tummycrypt/tinyland-auth": "^0.2.0"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"
   }
