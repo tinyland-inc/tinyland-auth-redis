@@ -1,6 +1,6 @@
 # @tummycrypt/tinyland-auth-redis
 
-Redis storage adapter for [@tummycrypt/tinyland-auth](https://github.com/Jesssullivan/tinyland-auth), backed by [Upstash Redis](https://upstash.com/) (`@upstash/redis`).
+Redis storage adapter for [@tummycrypt/tinyland-auth](https://www.npmjs.com/package/@tummycrypt/tinyland-auth), backed by [Upstash Redis](https://upstash.com/) (`@upstash/redis`).
 
 Implements the full `IStorageAdapter` interface: users, sessions, TOTP secrets, backup codes, invitations, and audit events.
 

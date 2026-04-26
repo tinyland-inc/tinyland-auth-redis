@@ -6,93 +6,37 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (no actual publish)'
+        description: "Dry run without publishing"
         required: false
         type: boolean
         default: true
 
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+  packages: write
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Run tests
-        run: pnpm test:unit
-
-      - name: Build
-        run: pnpm build
-
-  publish-npm:
-    needs: [test]
-    name: Publish to npm
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: pnpm install --no-frozen-lockfile && pnpm build
-
-      - name: Publish to npm
-        if: ${{ github.event_name == 'release' || github.event.inputs.dry_run != 'true' }}
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Dry run
-        if: ${{ github.event.inputs.dry_run == 'true' }}
-        run: npm pack --dry-run 2>&1 | tail -20
-
-  publish-github:
-    needs: [test]
-    name: Publish to GitHub Packages
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@tummycrypt'
-
-      - run: pnpm install --no-frozen-lockfile && pnpm build
-
-      - name: Publish to GitHub Packages
-        if: ${{ github.event_name == 'release' || github.event.inputs.dry_run != 'true' }}
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Dry run
-        if: ${{ github.event.inputs.dry_run == 'true' }}
-        run: npm pack --dry-run 2>&1 | tail -20
+  package:
+    uses: tinyland-inc/ci-templates/.github/workflows/js-bazel-package.yml@0d3a9c1fb5198d0670b773e78d9dad6cc5867a98
+    with:
+      runner_mode: shared
+      shared_runner_labels_json: ${{ vars.PRIMARY_LINUX_RUNNER_LABELS_JSON }}
+      runner_labels_json: ${{ vars.PRIMARY_LINUX_RUNNER_LABELS_JSON }}
+      workspace_mode: isolated
+      publish_mode: same_runner
+      node_versions: '["22"]'
+      publish_node_version: "22"
+      pnpm_version: "10.13.1"
+      typecheck_command: pnpm typecheck
+      unit_test_command: pnpm test:unit
+      build_command: pnpm build
+      package_check_command: pnpm check:package
+      bazel_targets: "//:pkg //:test"
+      package_dir: ./bazel-bin/pkg
+      npm_access: public
+      github_package_name: "@tummycrypt/tinyland-auth-redis"
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

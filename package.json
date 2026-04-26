@@ -2,19 +2,24 @@
   "name": "@tummycrypt/tinyland-auth-redis",
   "version": "0.1.1",
   "type": "module",
+  "packageManager": "pnpm@10.13.1",
   "license": "MIT",
   "description": "Redis (Upstash) storage adapter for @tummycrypt/tinyland-auth",
+  "homepage": "https://github.com/tinyland-inc/tinyland-auth-redis",
+  "bugs": {
+    "url": "https://github.com/tinyland-inc/tinyland-auth-redis/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tinyland-inc/tinyland-auth-redis.git"
+    "url": "git+https://github.com/tinyland-inc/tinyland-auth-redis.git"
   },
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "files": [
@@ -23,11 +28,14 @@
   ],
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "prepublishOnly": "npm run build"
+    "check:package": "publint",
+    "prepublishOnly": "pnpm build && pnpm check:package"
   },
   "dependencies": {
     "@upstash/redis": "^1.36.3"
@@ -36,7 +44,9 @@
     "@tummycrypt/tinyland-auth": "^0.2.0"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
+    "@tummycrypt/tinyland-auth": "^0.2.2",
+    "@types/node": "^22.0.0",
+    "publint": "^0.3.18",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"
   }
