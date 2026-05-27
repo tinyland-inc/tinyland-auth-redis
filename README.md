@@ -18,6 +18,10 @@ Peer dependency:
 npm install @tummycrypt/tinyland-auth
 ```
 
+`@tummycrypt/tinyland-auth-redis` accepts `@tummycrypt/tinyland-auth`
+`^0.2.0 || ^0.3.0`. The package test/build lane uses the latest 0.3 line so the
+Redis adapter stays compatible with the current auth contract.
+
 ## Quick Start
 
 ```typescript
