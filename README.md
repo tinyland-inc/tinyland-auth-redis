@@ -6,6 +6,11 @@ Implements the full `IStorageAdapter` interface: users, sessions, TOTP secrets, 
 
 ## Installation
 
+Current Bazel-first release authority is the GitHub release/tag, GitHub
+Packages artifact, and Tinyland Bazel registry module. The npmjs
+`@tummycrypt/tinyland-auth-redis` package remains a legacy compatibility surface
+and may lag the current release.
+
 ```bash
 npm install @tummycrypt/tinyland-auth-redis
 # or

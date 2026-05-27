@@ -14,11 +14,9 @@ permissions:
 
 jobs:
   package:
-    uses: tinyland-inc/ci-templates/.github/workflows/js-bazel-package.yml@0d3a9c1fb5198d0670b773e78d9dad6cc5867a98
+    uses: tinyland-inc/ci-templates/.github/workflows/js-bazel-package.yml@be3ffb3193e238baf2aeec6b1309454cee76d888
     with:
-      runner_mode: shared
-      shared_runner_labels_json: ${{ vars.PRIMARY_LINUX_RUNNER_LABELS_JSON }}
-      runner_labels_json: ${{ vars.PRIMARY_LINUX_RUNNER_LABELS_JSON }}
+      runner_mode: hosted
       workspace_mode: isolated
       publish_mode: same_runner
       node_versions: '["22"]'
@@ -31,6 +29,7 @@ jobs:
       bazel_targets: "//:pkg //:test"
       package_dir: ./bazel-bin/pkg
       npm_access: public
+      npm_publish_mode: disabled
       github_package_name: "@tinyland-inc/tinyland-auth-redis"
       dry_run: true
     secrets: inherit
