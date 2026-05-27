@@ -19,11 +19,11 @@ permissions:
 
 jobs:
   package:
-    uses: tinyland-inc/ci-templates/.github/workflows/js-bazel-package.yml@be3ffb3193e238baf2aeec6b1309454cee76d888
+    uses: tinyland-inc/ci-templates/.github/workflows/js-bazel-package.yml@61cd1338ca9dae8a25985c0a36ff7beb111449be
     with:
       runner_mode: hosted
       workspace_mode: isolated
-      publish_mode: same_runner
+      publish_mode: hosted_exception
       node_versions: '["22"]'
       publish_node_version: "22"
       pnpm_version: "10.13.1"
